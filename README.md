@@ -45,7 +45,7 @@ The configuration parameters are:
 
 ####Static single use
 
-RxObservableDiskCache.transform() are a set of methods you can call with any observable and configuration parameters that will return the transformed `Observable`.
+`RxObservableDiskCache.transform()` are a set of methods you can call with any observable and configuration parameters that will return the transformed `Observable`.
 
 ```java
 RxObservableDiskCache.
@@ -59,7 +59,7 @@ RxObservableDiskCache.
 ```
 ####Instance
 
-RxObservableDiskCache.create() creates an instance of RxObservableDiskCache for the same book, Value and Policy that can be reused for different `Single`s or  single value `Observable`s.
+`RxObservableDiskCache.create()` creates an instance of RxObservableDiskCache for the same book, Value and Policy that can be reused for different `Single`s or  single value `Observable`s.
 
 ```java
 RxObservableDiskCache<UserProfile, TimeAndVersionPolicy> myCache =
