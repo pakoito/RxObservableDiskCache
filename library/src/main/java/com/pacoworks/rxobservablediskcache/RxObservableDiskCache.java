@@ -32,11 +32,6 @@ public final class RxObservableDiskCache<Policy, Value> {
 
     private final Func1<Policy, Boolean> policyValidator;
 
-    public RxObservableDiskCache(Func1<Value, Policy> policyCreator,
-            Func1<Policy, Boolean> policyValidator) {
-        this(RxPaperBook.with(BuildConfig.APPLICATION_ID), policyCreator, policyValidator);
-    }
-
     public RxObservableDiskCache(RxPaperBook book, Func1<Value, Policy> policyCreator,
             Func1<Policy, Boolean> policyValidator) {
         this.book = book;
@@ -45,15 +40,14 @@ public final class RxObservableDiskCache<Policy, Value> {
     }
 
     public static <Value, Policy> Observable<Cached<Value, Policy>> wrap(Single<Value> single,
-            String key, Func1<Value, Policy> policyCreator,
-            Func1<Policy, Boolean> policyValidation) {
+            String key, Func1<Value, Policy> policyCreator, Func1<Policy, Boolean> policyValidation) {
         return wrap(single, key, RxPaperBook.with(BuildConfig.APPLICATION_ID), policyCreator,
                 policyValidation);
     }
 
-    public static <Value, Policy> Observable<Cached<Value, Policy>> wrap(final Single<Value> single,
-            final String key, final RxPaperBook cache, final Func1<Value, Policy> policyCreator,
-            final Func1<Policy, Boolean> policyValidation) {
+    public static <Value, Policy> Observable<Cached<Value, Policy>> wrap(
+            final Single<Value> single, final String key, final RxPaperBook cache,
+            final Func1<Value, Policy> policyCreator, final Func1<Policy, Boolean> policyValidation) {
         return Observable.concat(RxObservableDiskCache.<Value, Policy> requestCachedValue(key,
                 cache, policyValidation), requestFreshValue(single, key, cache, policyCreator));
     }
@@ -64,12 +58,13 @@ public final class RxObservableDiskCache<Policy, Value> {
                 .switchIfEmpty(RxObservableDiskCache.<Policy> deleteValueAndPolicy(key, cache))
                 .flatMap(RxObservableDiskCache.<Value, Policy> readValue(key, cache))
                 .doOnNext(RxObservableDiskCacheLog.<Value, Policy> logCacheHit(key))
+                .doOnError(RxObservableDiskCacheLog.<Value, Policy> logCacheMiss(key))
                 .onErrorResumeNext(Observable.<Cached<Value, Policy>> empty());
     }
 
     private static <Policy> Observable<Policy> deleteValueAndPolicy(String key, RxPaperBook cache) {
         return Completable.mergeDelayError(cache.delete(key), cache.delete(composePolicyKey(key)))
-                .doOnCompleted(RxObservableDiskCacheLog.logCacheMiss(key)).toObservable();
+                .doOnCompleted(RxObservableDiskCacheLog.logCacheInvalid(key)).toObservable();
     }
 
     private static <Value, Policy> Func1<Policy, Observable<Cached<Value, Policy>>> readValue(
@@ -85,8 +80,7 @@ public final class RxObservableDiskCache<Policy, Value> {
     }
 
     private static <Value, Policy> Observable<Cached<Value, Policy>> requestFreshValue(
-            Single<Value> single, String key, RxPaperBook cache,
-            Func1<Value, Policy> policyCreator) {
+            Single<Value> single, String key, RxPaperBook cache, Func1<Value, Policy> policyCreator) {
         return single.toObservable().map(createObservableCached(policyCreator))
                 .flatMap(RxObservableDiskCache.<Value, Policy> toStoreKeyAndValue(key, cache));
     }
@@ -96,10 +90,9 @@ public final class RxObservableDiskCache<Policy, Value> {
         return new Func1<Cached<Value, Policy>, Observable<Cached<Value, Policy>>>() {
             @Override
             public Observable<Cached<Value, Policy>> call(final Cached<Value, Policy> ktCached) {
-                return Completable
-                        .mergeDelayError(cache.write(key, ktCached.value),
-                                cache.write(composePolicyKey(key), ktCached.policy))
-                        .andThen(Observable.just(ktCached));
+                return Completable.mergeDelayError(cache.write(key, ktCached.value),
+                        cache.write(composePolicyKey(key), ktCached.policy)).andThen(
+                        Observable.just(ktCached));
             }
         };
     }

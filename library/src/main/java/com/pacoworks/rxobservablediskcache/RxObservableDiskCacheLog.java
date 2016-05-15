@@ -33,11 +33,20 @@ public class RxObservableDiskCacheLog {
         };
     }
 
-    public static Action0 logCacheMiss(final String key) {
+    public static Action1<Throwable> logCacheMiss(final String key) {
+        return new Action1<Throwable>() {
+            @Override
+            public void call(Throwable t) {
+                Log.d(TAG, "Cache miss: " + key);
+            }
+        };
+    }
+
+    public static Action0 logCacheInvalid(final String key) {
         return new Action0() {
             @Override
             public void call() {
-                Log.d(TAG, "Cache miss: " + key);
+                Log.d(TAG, "Cache invalid: " + key);
             }
         };
     }
