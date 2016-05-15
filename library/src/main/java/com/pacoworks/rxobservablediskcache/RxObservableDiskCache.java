@@ -116,12 +116,16 @@ public final class RxObservableDiskCache<Value, Policy> {
 
     private static <Value, Policy> Observable<Cached<Value, Policy>> requestCachedValue(
             final String key, final RxPaperBook cache, Func1<Policy, Boolean> policyValidator) {
-        return cache.<Policy> read(composePolicyKey(key)).toObservable().filter(policyValidator)
+        return cache
+                .<Policy> read(composePolicyKey(key))
+                .toObservable()
+                .filter(policyValidator)
                 .switchIfEmpty(RxObservableDiskCache.<Policy> deleteValueAndPolicy(key, cache))
                 .flatMap(RxObservableDiskCache.<Value, Policy> readValue(key, cache))
                 .doOnNext(RxObservableDiskCacheLog.<Value, Policy> logCacheHit(key))
                 .doOnError(RxObservableDiskCacheLog.<Value, Policy> logCacheMiss(key))
-                .onErrorResumeNext(Observable.<Cached<Value, Policy>> empty());
+                .onErrorResumeNext(
+                        RxObservableDiskCache.<Value, Policy> forwardOnlyErrors(key, cache));
     }
 
     private static <Policy> Observable<Policy> deleteValueAndPolicy(String key, RxPaperBook cache) {
@@ -137,6 +141,18 @@ public final class RxObservableDiskCache<Value, Policy> {
                 return cache.<Value> read(key)
                         .map(RxObservableDiskCache.<Value, Policy> createDiskCached(policy))
                         .toObservable();
+            }
+        };
+    }
+
+    private static <Value, Policy> Func1<Throwable, Observable<Cached<Value, Policy>>> forwardOnlyErrors(
+            final String key, final RxPaperBook cache) {
+        return new Func1<Throwable, Observable<Cached<Value, Policy>>>() {
+            @Override
+            public Observable<Cached<Value, Policy>> call(Throwable throwable) {
+                return throwable instanceof IllegalArgumentException ? RxObservableDiskCache
+                        .<Cached<Value, Policy>> deleteValueAndPolicy(key, cache) : Observable
+                        .<Cached<Value, Policy>> error(throwable);
             }
         };
     }

@@ -26,7 +26,9 @@ Three simple Policy classes are included with RxObservableDiskCache: TimePolicy,
 
 ####Error handling
 
-Any storage errors are suppressed with a "cache miss" message logged. Any errors on the operation are forwarded, like with any `Observable`.
+Any storage errors are: logged with a "cache miss" message, the current key and value get deleted, and the error is forwarded.
+
+Any errors on the operation are forwarded too, like with any `Observable`.
 
 Expect 0 results for cache and operation failures, 1 result when the cache is not found or valid and the operation succeeds, 1 result when the cache is found and valid but the operation fails, and 2 results when both the cache and the operation succeed.
 
@@ -36,7 +38,7 @@ There is a full test suite with examples on the sample project.
 
 The configuration parameters are:
 
-* The `Single` or single value `Observable` to be wrapped.
+* The `Single` or single value `Observable` operation to be wrapped.
 * A key string under which the Value will be stored.
 * The [RxPaperBook](https://github.com/pakoito/RxPaper/blob/master/README.md#working-on-a-book) database where the Value and Policy will be stored.
 * A creation and validation functions for the Policy.
