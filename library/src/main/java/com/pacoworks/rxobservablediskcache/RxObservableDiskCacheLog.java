@@ -42,7 +42,7 @@ public class RxObservableDiskCacheLog {
         return new Action1<Throwable>() {
             @Override
             public void call(Throwable t) {
-                Log.d(TAG, "Cache miss: " + key);
+                Log.e(TAG, "Cache miss: " + key + "\nCaused by: " + t.getMessage());
             }
         };
     }
