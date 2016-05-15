@@ -8,7 +8,7 @@ RxObservableDiskCache was created with a single purpose: help you store your net
 
 To provide a good UX, your app should be able to work offline, and also display results as soon as they're requested. Historically this has been done by storing your data on SQLite, or a custom network cache. These options introduce maintenance overhead: SQLite requires a strict data model, careful database updates, and usage of sintactic sugar libraries like ORMs to make it palatable. The custom network cache depends on your server team introducing etags and other similar mechanisms, which are not always available.
 
-RxObservableDiskCache relies on a technology that's common on desktop and server: key-value disk stores. By using [RxPaper](https://github.com/pakoito/RxPaper) behind the scenes it's able to efficiently store any result in an schemaless document just to refetch it later. This makes chaching transparent for most network calls, you just need to configure them once with the correct caching policy. It's just one method call that wraps your `Single` or single value `Observable`.
+RxObservableDiskCache relies on a technology that's common on desktop and server: key-value disk stores. By using [RxPaper](https://github.com/pakoito/RxPaper) behind the scenes it's able to efficiently store any result in an schemaless document just to refetch it later. This makes caching transparent for most network calls, you just need to configure them once with the correct caching policy. It's just one method call that wraps your `Single` or single value `Observable`.
 
 To avoid your data getting stale due to time limits or versioning, RxObservableDiskCache allows you to store an arbitrary caching Policy. This Policy is any simple object that helps you identify whether your data is outdated and has to be removed. RxObservableDiskCache provides three different Policy objects, but you can create and use your own. This way you can decide how to handle staleness the same way you would do in SQLite or when using etags: by dropping the data, or programming defensively to account for model changes.
 
@@ -16,7 +16,7 @@ To avoid your data getting stale due to time limits or versioning, RxObservableD
 
 ###Storage
 
-RxObservableDiskCache uses [RxPaper](https://github.com/pakoito/RxPaper) internally, so it's recommended to go to its [README](https://github.com/pakoito/RxPaper/blob/master/README.md) for reference on what Values are serializable, and what other behaviours are expected. RxObservableDiskCache is not opinionanted about the [RxPaper](https://github.com/pakoito/RxPaper)Book you pass onto it, so feel free to use it externally to read, modify, or purge any data outisde the RxObservableDiskCache scope.
+RxObservableDiskCache uses [RxPaper](https://github.com/pakoito/RxPaper) internally, so it's recommended to go to its [README](https://github.com/pakoito/RxPaper/blob/master/README.md) for reference on what Values are serializable, and what other behaviours are expected. RxObservableDiskCache is not opinionanted about the `RxPaperBook` you pass onto it, so feel free to use it externally to read, modify, or purge any data outisde the RxObservableDiskCache scope.
 
 ###Policy
 
