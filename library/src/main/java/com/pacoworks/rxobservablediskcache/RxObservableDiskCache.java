@@ -122,10 +122,10 @@ public final class RxObservableDiskCache<Value, Policy> {
                 .filter(policyValidator)
                 .switchIfEmpty(
                         RxObservableDiskCache.<Policy> deleteValueAndPolicy(key, cache)
-                                .doOnCompleted(RxObservableDiskCacheLog.logCacheInvalid(key)))
+                                .doOnCompleted(Logging.logCacheInvalid(key)))
                 .flatMap(RxObservableDiskCache.<Value, Policy> readValue(key, cache))
-                .doOnNext(RxObservableDiskCacheLog.<Value, Policy> logCacheHit(key))
-                .doOnError(RxObservableDiskCacheLog.<Value, Policy> logCacheMiss(key))
+                .doOnNext(Logging.<Value, Policy> logCacheHit(key))
+                .doOnError(Logging.<Value, Policy> logCacheMiss(key))
                 .onErrorResumeNext(RxObservableDiskCache.<Value, Policy> handleErrors(key, cache));
     }
 
