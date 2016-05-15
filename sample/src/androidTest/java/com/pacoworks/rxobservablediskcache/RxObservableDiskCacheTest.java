@@ -58,8 +58,8 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
-        RxObservableDiskCache
-                .wrap(Single.just(list), KEY, testBook, new Func1<List<Serializable>, MyPolicy>() {
+        RxObservableDiskCache.wrap(Single.just(list), KEY, testBook,
+                new Func1<List<Serializable>, MyPolicy>() {
                     @Override
                     public MyPolicy call(List<Serializable> serializables) {
                         return new MyPolicy();
@@ -81,8 +81,8 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
-        RxObservableDiskCache
-                .wrap(Single.just(list), KEY, testBook, new Func1<List<Serializable>, MyPolicy>() {
+        RxObservableDiskCache.wrap(Single.just(list), KEY, testBook,
+                new Func1<List<Serializable>, MyPolicy>() {
                     @Override
                     public MyPolicy call(List<Serializable> serializables) {
                         return new MyPolicy();
@@ -105,8 +105,8 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
-        RxObservableDiskCache
-                .wrap(Single.just(list), KEY, testBook, new Func1<List<Serializable>, MyPolicy>() {
+        RxObservableDiskCache.wrap(Single.just(list), KEY, testBook,
+                new Func1<List<Serializable>, MyPolicy>() {
                     @Override
                     public MyPolicy call(List<Serializable> serializables) {
                         return new MyPolicy();
