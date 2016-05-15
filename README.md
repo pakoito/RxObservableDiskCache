@@ -6,7 +6,7 @@ RxObservableDiskCache is a library to save the results of `Single`s or single va
 
 RxObservableDiskCache was created with a single purpose: help you store your network results in a disk cache and refetch them as soon as they're re-requested. It also solves displaying values while waiting for network results, when the user is offline, or when the server is unavailable.
 
-To provide a good UX, your app should be able to work offline, and also display results as soon as they're requested. Historically this has been done by storing your data on SQLite, or a custom network cache. These options introduce maintenance overhead: SQLite requires a strict data model, careful database updates, and usage of sintactic sugar libraries like ORMs to make it palatable. The custom network cache depends on your server team introducing etags and other similar mechanisms, which are not always available.
+To provide a good UX your app should be able to work offline and also display results as soon as they're requested. Historically this has been done by storing your data on SQLite, or a custom network cache. These options introduce maintenance overhead: SQLite requires a strict data model, careful database updates, and usage of sintactic sugar libraries like ORMs to make it palatable. The custom network cache depends on your server team introducing etags and other similar mechanisms, which are not always available.
 
 RxObservableDiskCache relies on a technology that's common on desktop and server: key-value disk stores. By using [RxPaper](https://github.com/pakoito/RxPaper) behind the scenes it's able to efficiently store any result in an schemaless document just to refetch it later. This makes caching transparent for most network calls, you just need to configure them once with the correct caching policy. It's just one method call that wraps your `Single` or single value `Observable`.
 
@@ -16,17 +16,17 @@ To avoid your data getting stale due to time limits or versioning, RxObservableD
 
 ####Storage
 
-RxObservableDiskCache uses [RxPaper](https://github.com/pakoito/RxPaper) internally, so it's recommended to go to its [README](https://github.com/pakoito/RxPaper/blob/master/README.md) for reference on what Values are serializable, and what other behaviours are expected. RxObservableDiskCache is not opinionanted about the `RxPaperBook` you pass onto it, so feel free to use it externally to read, modify, or purge any data outisde the RxObservableDiskCache scope.
+RxObservableDiskCache uses [RxPaper](https://github.com/pakoito/RxPaper) internally, so it's recommended to go to its [README](https://github.com/pakoito/RxPaper/blob/master/README.md) for reference on what Values are serializable, and what other behaviours are expected. RxObservableDiskCache is not opinionanted about the `RxPaperBook` you pass onto it, so feel free to use it externally to read, modify, or purge any data outside the RxObservableDiskCache scope.
 
 ####Policy
 
 Behind the scenes Policy objects are stored and retrieved separately from Values to avoid unnecessary deserialization. They're checked before the Value is retrieved to see if it has to be deleted instead. Policy objects are recommended to be kept as small as possible.
 
-Three Policy classes are included with RxObservableDiskCache: TimePolicy, VersionPolicy, and TimeAndVersionPolicy.
+Three simple Policy classes are included with RxObservableDiskCache: TimePolicy, VersionPolicy, and TimeAndVersionPolicy. You can still use any other class as Policy.
 
 ####Error handling
 
-Any storage errors are supressed and a cache miss message is logged. Any errors on the operation are forwarded.
+Any storage errors are suppressed with a "cache miss" message logged. Any errors on the operation are forwarded, like with any `Observable`.
 
 Expect 0 results for cache and operation failures, 1 result when the cache is not found or valid and the operation succeeds, 1 result when the cache is found and valid but the operation fails, and 2 results when both the cache and the operation succeed.
 
