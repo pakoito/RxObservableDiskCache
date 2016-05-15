@@ -8,9 +8,11 @@ RxObservableDiskCache was created with a single purpose: help you store your net
 
 To provide a good UX, your app should be able to work offline, and also display results as soon as they're requested. Historically this has been done by storing your data on SQLite, or a custom network cache. These options introduce maintenance overhead: SQLite requires a strict data model, careful database updates, and usage of sintactic sugar libraries like ORMs to make it palatable. The custom network cache depends on your server team introducing etags and other similar mechanisms, which are not always available.
 
-RxObservableDiskCache relies on a technology that's common on desktop and server: key-value disk stores. By using [RxPaper](https://github.com/pakoito/RxPaper) behind the scenes, it's able to efficiently store any result in an schemaless document just to refetch it later. This makes chaching transparent for most network calls, you just need to configure them once with the correct caching policy. It's just one method call that wraps your `Single` or single value `Observable`.
+RxObservableDiskCache relies on a technology that's common on desktop and server: key-value disk stores. By using [RxPaper](https://github.com/pakoito/RxPaper) behind the scenes it's able to efficiently store any result in an schemaless document just to refetch it later. This makes chaching transparent for most network calls, you just need to configure them once with the correct caching policy. It's just one method call that wraps your `Single` or single value `Observable`.
 
 To avoid your data getting stale due to time limits or versioning, RxObservableDiskCache allows you to store an arbitrary caching Policy. This Policy is any simple object that helps you identify whether your data is outdated and has to be removed. RxObservableDiskCache provides three different Policy objects, but you can create and use your own. This way you can decide how to handle staleness the same way you would do in SQLite or when using etags: by dropping the data, or programming defensively to account for model changes.
+
+##Usage
 
 ###Storage
 
@@ -20,7 +22,7 @@ RxObservableDiskCache uses [RxPaper](https://github.com/pakoito/RxPaper) interna
 
 Behind the scenes Policy objects are stored and retrieved separately from Values to avoid unnecessary deserialization. They're checked before the Value is retrieved to see if it has to be deleted instead. Policy objects are recommended to be kept as small as possible.
 
-##Usage
+Three Policy classes are included with RxObservableDiskCache: TimePolicy, VersionPolicy, and TimeAndVersionPolicy.
 
 ####Configuration
 
@@ -96,7 +98,7 @@ or to your `pom.xml`
 
 ##FAQ
 
-####How fast is it? Isn't there an overhead to always getting old values?
+#### How fast is it? Isn't there an overhead to be always getting old values?
 
 As fast as the underlying [Paper](https://github.com/pilgr/Paper) library. Policy is used to reduce deserialization overhead when it's not required, so Values are only fetched when they're surely required and validated. [Kryo](https://github.com/EsotericSoftware/kryo) is binary serialization faster than Jackson and Gson.
 
@@ -113,7 +115,9 @@ Because it transforms from `Single` to `Observable`, and I wanted to keep the tr
 Although it doesn't make much sense to me to duplicate every value on an `Observable` operation, you can do it like this:
 
 ```java
-myNotSingleObservable.flatMap(value -> RxObservableDiskCache.transform(Observable.just(value), /* rest of parameters */))
+myNotSingleObservable.flatMap(
+            value -> 
+                RxObservableDiskCache.transform(Observable.just(value), /* rest of parameters */))
 ```
 
 ##Contribution
