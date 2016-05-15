@@ -52,7 +52,8 @@ public final class RxObservableDiskCache<Value, Policy> {
     }
 
     /**
-     * Creates a reusable {@link RxObservableDiskCache} for the same Policy and Value types.
+     * Creates a reusable {@link RxObservableDiskCache} for the same {@link RxPaperBook}, Policy and
+     * Value types.
      *
      * @param book {@link RxPaperBook} storage book
      * @param policyCreator lazy method to construct a Policy object
