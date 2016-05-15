@@ -14,15 +14,23 @@ To avoid your data getting stale due to time limits or versioning, RxObservableD
 
 ##Usage
 
-###Storage
+####Storage
 
 RxObservableDiskCache uses [RxPaper](https://github.com/pakoito/RxPaper) internally, so it's recommended to go to its [README](https://github.com/pakoito/RxPaper/blob/master/README.md) for reference on what Values are serializable, and what other behaviours are expected. RxObservableDiskCache is not opinionanted about the `RxPaperBook` you pass onto it, so feel free to use it externally to read, modify, or purge any data outisde the RxObservableDiskCache scope.
 
-###Policy
+####Policy
 
 Behind the scenes Policy objects are stored and retrieved separately from Values to avoid unnecessary deserialization. They're checked before the Value is retrieved to see if it has to be deleted instead. Policy objects are recommended to be kept as small as possible.
 
 Three Policy classes are included with RxObservableDiskCache: TimePolicy, VersionPolicy, and TimeAndVersionPolicy.
+
+####Error handling
+
+Any storage errors are supressed and a cache miss message is logged. Any errors on the operation are forwarded.
+
+Expect 0 results for cache and operation failures, 1 result when the cache is not found or valid and the operation succeeds, 1 result when the cache is found and valid but the operation fails, and 2 results when both the cache and the operation succeed.
+
+There is a full test suite with examples on the sample project.
 
 ####Configuration
 
@@ -47,7 +55,6 @@ RxObservableDiskCache.
         TimeAndVersionPolicy.validate(BuildConfig.VERSION_CODE))
     .subscribe(/* Do something withe the data */);
 ```
-
 ####Instance
 
 RxObservableDiskCache.create() creates an instance of RxObservableDiskCache for the same book, Value and Policy that can be reused for different `Single`s or  single value `Observable`s.
