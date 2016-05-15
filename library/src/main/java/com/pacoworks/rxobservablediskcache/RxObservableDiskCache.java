@@ -18,12 +18,24 @@ package com.pacoworks.rxobservablediskcache;
 
 import com.pacoworks.rxpaper.RxPaperBook;
 
+import android.content.Context;
+
 import rx.Completable;
 import rx.Observable;
 import rx.Single;
 import rx.functions.Func1;
 
-public final class RxObservableDiskCache<Policy, Value> {
+/**
+ * Static methods to add disk caching behaviour to {@link Single} objects.
+ * <p/>
+ * Make sure to call {@link RxPaperBook#init(Context)} at least once beforehand to initialize the
+ * underlying database.
+ *
+ * @param <Value> type of the data to store
+ * @param <Policy> type of the policy to store
+ * @author pakoito
+ */
+public final class RxObservableDiskCache<Value, Policy> {
     private static final String POLICY_APPEND = "_policy";
 
     private final RxPaperBook book;
@@ -32,29 +44,79 @@ public final class RxObservableDiskCache<Policy, Value> {
 
     private final Func1<Policy, Boolean> policyValidator;
 
-    public RxObservableDiskCache(RxPaperBook book, Func1<Value, Policy> policyCreator,
+    RxObservableDiskCache(RxPaperBook book, Func1<Value, Policy> policyCreator,
             Func1<Policy, Boolean> policyValidator) {
         this.book = book;
         this.policyValidator = policyValidator;
         this.policyCreator = policyCreator;
     }
 
-    public static <Value, Policy> Observable<Cached<Value, Policy>> wrap(Single<Value> single,
-            String key, Func1<Value, Policy> policyCreator, Func1<Policy, Boolean> policyValidation) {
-        return wrap(single, key, RxPaperBook.with(BuildConfig.APPLICATION_ID), policyCreator,
-                policyValidation);
+    /**
+     * Creates a reusable {@link RxObservableDiskCache} for the same Policy and Value types.
+     *
+     * @param book {@link RxPaperBook} storage book
+     * @param policyCreator lazy method to construct a Policy object
+     * @param policyValidator lazy method to validate a Policy object
+     */
+    public static <Value, Policy> RxObservableDiskCache<Value, Policy> create(RxPaperBook book,
+            Func1<Value, Policy> policyCreator, Func1<Policy, Boolean> policyValidator) {
+        return new RxObservableDiskCache<>(book, policyCreator, policyValidator);
     }
 
-    public static <Value, Policy> Observable<Cached<Value, Policy>> wrap(
-            final Single<Value> single, final String key, final RxPaperBook cache,
-            final Func1<Value, Policy> policyCreator, final Func1<Policy, Boolean> policyValidation) {
+    /**
+     * Transforms a {@link Single} into an {@link Observable} returning a disk cached version of the
+     * latest Value seen for the same key followed by the {@link Single} result.
+     * <p/>
+     * The execution assures that the cached Value, if available, will be returned first. If no
+     * Value is cached, or its Policy is not validated, then the current Value and Policy are
+     * deleted silently and just the value of the {@link Single} is returned.
+     * <p/>
+     * This version uses a default {@link RxPaperBook}.
+     * 
+     * @param single {@link Single} operation whose result is to be cached
+     * @param key string value under where the values will be stored
+     * @param policyCreator lazy method to construct a Policy object
+     * @param policyValidator lazy method to validate a Policy object
+     * @param <Value> type of the data to store
+     * @param <Policy> type of the policy to store
+     * @return an {@link Observable} that will return a cached Value followed by the result of
+     *         executing single
+     */
+    public static <Value, Policy> Observable<Cached<Value, Policy>> transform(Single<Value> single,
+            String key, Func1<Value, Policy> policyCreator, Func1<Policy, Boolean> policyValidator) {
+        return transform(single, key, RxPaperBook.with(BuildConfig.APPLICATION_ID), policyCreator,
+                policyValidator);
+    }
+
+    /**
+     * Transforms a {@link Single} into an {@link Observable} returning a disk cached version of the
+     * latest Value seen for the same key followed by the {@link Single} result.
+     * <p/>
+     * The execution assures that the cached Value, if available, will be returned first. If no
+     * Value is cached, or its Policy is not validated, then the current Value and Policy are
+     * deleted silently and just the value of the {@link Single} is returned.
+     *
+     * @param single {@link Single} operation whose result is to be cached
+     * @param key string value under where the values will be stored
+     * @param paperBook storage book
+     * @param policyCreator lazy method to construct a Policy object
+     * @param policyValidator lazy method to validate a Policy object
+     * @param <Value> type of the data to store
+     * @param <Policy> type of the policy to store
+     * @return an {@link Observable} that will return a cached Value followed by the result of
+     *         executing single
+     */
+    public static <Value, Policy> Observable<Cached<Value, Policy>> transform(
+            final Single<Value> single, final String key, final RxPaperBook paperBook,
+            final Func1<Value, Policy> policyCreator, final Func1<Policy, Boolean> policyValidator) {
         return Observable.concat(RxObservableDiskCache.<Value, Policy> requestCachedValue(key,
-                cache, policyValidation), requestFreshValue(single, key, cache, policyCreator));
+                paperBook, policyValidator),
+                requestFreshValue(single, key, paperBook, policyCreator));
     }
 
     private static <Value, Policy> Observable<Cached<Value, Policy>> requestCachedValue(
-            final String key, final RxPaperBook cache, Func1<Policy, Boolean> keyInvalidator) {
-        return cache.<Policy> read(composePolicyKey(key)).toObservable().filter(keyInvalidator)
+            final String key, final RxPaperBook cache, Func1<Policy, Boolean> policyValidator) {
+        return cache.<Policy> read(composePolicyKey(key)).toObservable().filter(policyValidator)
                 .switchIfEmpty(RxObservableDiskCache.<Policy> deleteValueAndPolicy(key, cache))
                 .flatMap(RxObservableDiskCache.<Value, Policy> readValue(key, cache))
                 .doOnNext(RxObservableDiskCacheLog.<Value, Policy> logCacheHit(key))
@@ -121,7 +183,21 @@ public final class RxObservableDiskCache<Policy, Value> {
         };
     }
 
-    public Observable<Cached<Value, Policy>> wrap(Observable<Value> singleObservable, String key) {
-        return wrap(singleObservable.toSingle(), key, book, policyCreator, policyValidator);
+    /**
+     * Transforms a single result {@link Observable} into an {@link Observable} returning a disk
+     * cached version of the latest Value seen for the same key followed by the {@link Observable}
+     * parameter result.
+     * <p/>
+     * The execution assures that the cached Value, if available, will be returned first. If no
+     * Value is cached, or its Policy is not validated, then the current Value and Policy are
+     * deleted silently and just the value of the {@link Single} is returned.
+     *
+     * @param single {@link Single} operation whose result is to be cached
+     * @param key string value under where the values will be stored
+     * @return an {@link Observable} that will return a cached Value followed by the result of
+     *         executing single
+     */
+    public Observable<Cached<Value, Policy>> transform(Single<Value> single, String key) {
+        return transform(single, key, book, policyCreator, policyValidator);
     }
 }

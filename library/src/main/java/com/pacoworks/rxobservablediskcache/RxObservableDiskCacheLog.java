@@ -21,10 +21,15 @@ import android.util.Log;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
+/**
+ * Private class containing logging methods for {@link RxObservableDiskCache}
+ *
+ * @author pakoito
+ */
 public class RxObservableDiskCacheLog {
-    public static final String TAG = "RxObservableDiskCache";
+    private static final String TAG = "RxObservableDiskCache";
 
-    public static <Value, Policy> Action1<Cached<Value, Policy>> logCacheHit(final String key) {
+    static <Value, Policy> Action1<Cached<Value, Policy>> logCacheHit(final String key) {
         return new Action1<Cached<Value, Policy>>() {
             @Override
             public void call(Cached<Value, Policy> valuePolicyCached) {
@@ -33,7 +38,7 @@ public class RxObservableDiskCacheLog {
         };
     }
 
-    public static Action1<Throwable> logCacheMiss(final String key) {
+    static Action1<Throwable> logCacheMiss(final String key) {
         return new Action1<Throwable>() {
             @Override
             public void call(Throwable t) {
@@ -42,7 +47,7 @@ public class RxObservableDiskCacheLog {
         };
     }
 
-    public static Action0 logCacheInvalid(final String key) {
+    static Action0 logCacheInvalid(final String key) {
         return new Action0() {
             @Override
             public void call() {

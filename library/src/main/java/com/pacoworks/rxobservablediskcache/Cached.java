@@ -16,6 +16,13 @@
 
 package com.pacoworks.rxobservablediskcache;
 
+/**
+ * Wrapper object for results of {@link RxObservableDiskCache} methods
+ * 
+ * @param <Value> type of the data to store
+ * @param <Policy> type of the policy to store
+ * @author pakoito
+ */
 public class Cached<Value, Policy> {
     public final Value value;
 

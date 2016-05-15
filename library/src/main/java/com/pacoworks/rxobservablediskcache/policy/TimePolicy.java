@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) pakoito 2016
  *
@@ -17,19 +16,35 @@
 
 package com.pacoworks.rxobservablediskcache.policy;
 
+import com.pacoworks.rxobservablediskcache.RxObservableDiskCache;
+
 import rx.functions.Func1;
 
+/**
+ * Policy class using timestamping for invalidation.
+ * <p/>
+ * It checks whether the Value has been stored less than a maximum caching time.
+ *
+ * @author pakoito
+ */
 public class TimePolicy {
     public final long timestamp;
 
-    public TimePolicy() {
+    TimePolicy() {
         timestamp = System.currentTimeMillis();
     }
 
-    public TimePolicy(long timestampMillis) {
+    TimePolicy(long timestampMillis) {
         this.timestamp = timestampMillis;
     }
 
+    /**
+     * Creation function to pass to {@link RxObservableDiskCache}
+     * <p/>
+     * It uses {@link System#currentTimeMillis()} internally.
+     *
+     * @return creation function
+     */
     public static <T> Func1<T, TimePolicy> create() {
         return new Func1<T, TimePolicy>() {
             @Override
@@ -39,6 +54,12 @@ public class TimePolicy {
         };
     }
 
+    /**
+     * Creation function to pass to {@link RxObservableDiskCache}
+     * 
+     * @param timestampMillis timestamp in milliseconds
+     * @return creation function
+     */
     public static <T> Func1<T, TimePolicy> create(final long timestampMillis) {
         return new Func1<T, TimePolicy>() {
             @Override
@@ -48,6 +69,12 @@ public class TimePolicy {
         };
     }
 
+    /**
+     * Validation function to pass to {@link RxObservableDiskCache}
+     *
+     * @param maxCacheDurationMillis maximum caching time allowed
+     * @return validation function
+     */
     public static Func1<TimePolicy, Boolean> validate(final long maxCacheDurationMillis) {
         return new Func1<TimePolicy, Boolean>() {
             @Override

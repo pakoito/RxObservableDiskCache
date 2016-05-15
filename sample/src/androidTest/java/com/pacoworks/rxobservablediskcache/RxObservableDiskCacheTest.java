@@ -58,7 +58,7 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
-        RxObservableDiskCache.wrap(Single.just(list), KEY, testBook,
+        RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
                 new Func1<List<Serializable>, MyPolicy>() {
                     @Override
                     public MyPolicy call(List<Serializable> serializables) {
@@ -81,7 +81,7 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
-        RxObservableDiskCache.wrap(Single.just(list), KEY, testBook,
+        RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
                 new Func1<List<Serializable>, MyPolicy>() {
                     @Override
                     public MyPolicy call(List<Serializable> serializables) {
@@ -105,7 +105,7 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
-        RxObservableDiskCache.wrap(Single.just(list), KEY, testBook,
+        RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
                 new Func1<List<Serializable>, MyPolicy>() {
                     @Override
                     public MyPolicy call(List<Serializable> serializables) {
@@ -127,7 +127,7 @@ public class RxObservableDiskCacheTest {
     @Test
     public void whenErrorAndNoCacheThenFail() throws Exception {
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
-        RxObservableDiskCache.wrap(Single.<Integer> error(new IllegalStateException()), KEY,
+        RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
                 testBook, new Func1<Integer, MyPolicy>() {
                     @Override
                     public MyPolicy call(Integer serializables) {
@@ -148,7 +148,7 @@ public class RxObservableDiskCacheTest {
     public void whenErrorAndCacheHitThenReturnCacheThenFail() throws Exception {
         whenNoCacheThenGetFromObservable();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
-        RxObservableDiskCache.wrap(Single.<Integer> error(new IllegalStateException()), KEY,
+        RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
                 testBook, new Func1<Integer, MyPolicy>() {
                     @Override
                     public MyPolicy call(Integer serializables) {
@@ -169,7 +169,7 @@ public class RxObservableDiskCacheTest {
     public void whenErrorAndCacheMissThenDeleteThenFail() throws Exception {
         whenNoCacheThenGetFromObservable();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
-        RxObservableDiskCache.wrap(Single.<Integer> error(new IllegalStateException()), KEY,
+        RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
                 testBook, new Func1<Integer, MyPolicy>() {
                     @Override
                     public MyPolicy call(Integer serializables) {
