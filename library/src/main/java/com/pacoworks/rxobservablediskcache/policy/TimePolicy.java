@@ -48,7 +48,7 @@ public class TimePolicy {
         };
     }
 
-    private static Func1<TimePolicy, Boolean> validate(final long maxCacheDurationMillis) {
+    public static Func1<TimePolicy, Boolean> validate(final long maxCacheDurationMillis) {
         return new Func1<TimePolicy, Boolean>() {
             @Override
             public Boolean call(TimePolicy myPolicy) {

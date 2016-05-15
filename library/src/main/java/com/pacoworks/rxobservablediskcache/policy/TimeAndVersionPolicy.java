@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) pakoito 2016
  *
@@ -53,13 +52,13 @@ public class TimeAndVersionPolicy {
         };
     }
 
-    private static Func1<TimeAndVersionPolicy, Boolean> validate(final long maxCacheDurationMillis,
+    public static Func1<TimeAndVersionPolicy, Boolean> validate(final long maxCacheDurationMillis,
             final int version) {
         return new Func1<TimeAndVersionPolicy, Boolean>() {
             @Override
             public Boolean call(TimeAndVersionPolicy myPolicy) {
                 final boolean isTimeCorrect = System.currentTimeMillis() - myPolicy.timestamp < maxCacheDurationMillis;
-                final boolean isVersionCorrect = myPolicy.version <= version;
+                final boolean isVersionCorrect = myPolicy.version == version;
                 return isTimeCorrect && isVersionCorrect;
             }
         };

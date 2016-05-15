@@ -35,11 +35,11 @@ public class VersionPolicy {
         };
     }
 
-    private static Func1<VersionPolicy, Boolean> validate(final long currentVersion) {
+    public static Func1<VersionPolicy, Boolean> validate(final long currentVersion) {
         return new Func1<VersionPolicy, Boolean>() {
             @Override
             public Boolean call(VersionPolicy myPolicy) {
-                return myPolicy.version <= currentVersion;
+                return myPolicy.version == currentVersion;
             }
         };
     }
