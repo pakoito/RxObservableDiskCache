@@ -184,9 +184,8 @@ public final class RxObservableDiskCache<Value, Policy> {
     }
 
     /**
-     * Transforms a single result {@link Observable} into an {@link Observable} returning a disk
-     * cached version of the latest Value seen for the same key followed by the {@link Observable}
-     * parameter result.
+     * Transforms a {@link Single} into an {@link Observable} returning a disk cached version of the
+     * latest Value seen for the same key followed by the {@link Single} result.
      * <p/>
      * The execution assures that the cached Value, if available, will be returned first. If no
      * Value is cached, or its Policy is not validated, then the current Value and Policy are
