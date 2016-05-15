@@ -126,7 +126,8 @@ Although it doesn't make much sense to me to duplicate every value on an `Observ
 ```java
 myNotSingleObservable.flatMap(
             value -> 
-                RxObservableDiskCache.transform(Observable.just(value), /* rest of parameters */))
+                RxObservableDiskCache.transform(
+                        Observable.just(value).toSingle(), /* rest of parameters */))
 ```
 
 ##Contribution
