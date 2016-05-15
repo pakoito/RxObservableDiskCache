@@ -120,17 +120,18 @@ public final class RxObservableDiskCache<Value, Policy> {
                 .<Policy> read(composePolicyKey(key))
                 .toObservable()
                 .filter(policyValidator)
-                .switchIfEmpty(RxObservableDiskCache.<Policy> deleteValueAndPolicy(key, cache))
+                .switchIfEmpty(
+                        RxObservableDiskCache.<Policy> deleteValueAndPolicy(key, cache)
+                                .doOnCompleted(RxObservableDiskCacheLog.logCacheInvalid(key)))
                 .flatMap(RxObservableDiskCache.<Value, Policy> readValue(key, cache))
                 .doOnNext(RxObservableDiskCacheLog.<Value, Policy> logCacheHit(key))
                 .doOnError(RxObservableDiskCacheLog.<Value, Policy> logCacheMiss(key))
-                .onErrorResumeNext(
-                        RxObservableDiskCache.<Value, Policy> forwardOnlyErrors(key, cache));
+                .onErrorResumeNext(RxObservableDiskCache.<Value, Policy> handleErrors(key, cache));
     }
 
     private static <Policy> Observable<Policy> deleteValueAndPolicy(String key, RxPaperBook cache) {
         return Completable.mergeDelayError(cache.delete(key), cache.delete(composePolicyKey(key)))
-                .doOnCompleted(RxObservableDiskCacheLog.logCacheInvalid(key)).toObservable();
+                .toObservable();
     }
 
     private static <Value, Policy> Func1<Policy, Observable<Cached<Value, Policy>>> readValue(
@@ -145,14 +146,20 @@ public final class RxObservableDiskCache<Value, Policy> {
         };
     }
 
-    private static <Value, Policy> Func1<Throwable, Observable<Cached<Value, Policy>>> forwardOnlyErrors(
+    private static <Value, Policy> Func1<Throwable, Observable<Cached<Value, Policy>>> handleErrors(
             final String key, final RxPaperBook cache) {
         return new Func1<Throwable, Observable<Cached<Value, Policy>>>() {
             @Override
-            public Observable<Cached<Value, Policy>> call(Throwable throwable) {
-                return throwable instanceof IllegalArgumentException ? RxObservableDiskCache
-                        .<Cached<Value, Policy>> deleteValueAndPolicy(key, cache) : Observable
-                        .<Cached<Value, Policy>> error(throwable);
+            public Observable<Cached<Value, Policy>> call(final Throwable throwable) {
+                return RxObservableDiskCache.<Cached<Value, Policy>> deleteValueAndPolicy(key,
+                        cache).flatMap(
+                        new Func1<Cached<Value, Policy>, Observable<Cached<Value, Policy>>>() {
+                            @Override
+                            public Observable<Cached<Value, Policy>> call(
+                                    Cached<Value, Policy> valuePolicyCached) {
+                                return Observable.error(throwable);
+                            }
+                        });
             }
         };
     }
