@@ -100,7 +100,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenCacheMissThenDeleteThenGetFromObservable() throws Exception {
+    public void whenCacheInvalidThenDeleteThenGetFromObservable() throws Exception {
         whenNoCacheThenGetFromObservable();
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
@@ -166,7 +166,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenErrorAndCacheMissThenDeleteThenFail() throws Exception {
+    public void whenErrorAndCacheInvalidThenDeleteThenFail() throws Exception {
         whenNoCacheThenGetFromObservable();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
