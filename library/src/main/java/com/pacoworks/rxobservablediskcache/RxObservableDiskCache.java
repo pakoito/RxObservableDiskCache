@@ -35,7 +35,7 @@ import rx.functions.Func1;
  * @param <P> type of the policy to store
  * @author pakoito
  */
-public final class RxObservableDiskCache<V, P> {
+public class RxObservableDiskCache<V, P> {
     private static final String POLICY_APPEND = "_policy";
 
     private final RxPaperBook book;
