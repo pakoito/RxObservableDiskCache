@@ -58,6 +58,7 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
+        /* Act */
         RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
                 new Func1<List<Serializable>, MyPolicy>() {
                     @Override
@@ -71,6 +72,7 @@ public class RxObservableDiskCacheTest {
                     }
                 }).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
+        /* Assert */
         subscriber.assertNoErrors();
         subscriber.assertCompleted();
         subscriber.assertValueCount(2);
@@ -81,6 +83,7 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
+        /* Act */
         RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
                 new Func1<List<Serializable>, MyPolicy>() {
                     @Override
@@ -94,6 +97,7 @@ public class RxObservableDiskCacheTest {
                     }
                 }).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
+        /* Assert */
         subscriber.assertNoErrors();
         subscriber.assertCompleted();
         subscriber.assertValueCount(1);
@@ -105,6 +109,7 @@ public class RxObservableDiskCacheTest {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
+        /* Act */
         RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
                 new Func1<List<Serializable>, MyPolicy>() {
                     @Override
@@ -118,6 +123,7 @@ public class RxObservableDiskCacheTest {
                     }
                 }).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
+        /* Assert */
         subscriber.assertNoErrors();
         subscriber.assertCompleted();
         subscriber.assertValueCount(1);
@@ -127,6 +133,7 @@ public class RxObservableDiskCacheTest {
     @Test
     public void whenErrorAndNoCacheThenFail() throws Exception {
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
+        /* Act */
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
                 testBook, new Func1<Integer, MyPolicy>() {
                     @Override
@@ -140,6 +147,7 @@ public class RxObservableDiskCacheTest {
                     }
                 }).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
+        /* Assert */
         subscriber.assertValueCount(0);
         subscriber.assertError(IllegalStateException.class);
     }
@@ -161,6 +169,7 @@ public class RxObservableDiskCacheTest {
                     }
                 }).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
+        /* Assert */
         subscriber.assertValueCount(1);
         subscriber.assertError(IllegalStateException.class);
     }
@@ -182,6 +191,7 @@ public class RxObservableDiskCacheTest {
                     }
                 }).subscribe(subscriber);
         subscriber.awaitTerminalEvent();
+        /* Assert */
         subscriber.assertValueCount(0);
         subscriber.assertError(IllegalStateException.class);
         Assert.assertFalse(testBook.exists(KEY).toBlocking().value());
