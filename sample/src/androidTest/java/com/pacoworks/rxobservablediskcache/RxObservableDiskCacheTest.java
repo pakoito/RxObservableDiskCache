@@ -46,14 +46,14 @@ public class RxObservableDiskCacheTest {
     private RxPaperBook testBook;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         RxPaperBook.init(activity.getActivity());
         testBook = RxPaperBook.with("test_book");
         testBook.destroy().subscribe();
     }
 
     @Test
-    public void whenCacheHitThenGetFromCacheThenObservable() throws Exception {
+    public void whenCacheHitThenGetFromCacheThenObservable() {
         whenNoCacheThenGetFromObservable();
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
@@ -79,7 +79,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenNoCacheThenGetFromObservable() throws Exception {
+    public void whenNoCacheThenGetFromObservable() {
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
@@ -104,7 +104,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenCacheInvalidThenDeleteThenGetFromObservable() throws Exception {
+    public void whenCacheInvalidThenDeleteThenGetFromObservable() {
         whenNoCacheThenGetFromObservable();
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
@@ -131,7 +131,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenErrorAndNoCacheThenFail() throws Exception {
+    public void whenErrorAndNoCacheThenFail() {
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
         /* Act */
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
@@ -153,7 +153,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenErrorAndCacheHitThenReturnCacheThenFail() throws Exception {
+    public void whenErrorAndCacheHitThenReturnCacheThenFail() {
         whenNoCacheThenGetFromObservable();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
@@ -175,7 +175,7 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenErrorAndCacheInvalidThenDeleteThenFail() throws Exception {
+    public void whenErrorAndCacheInvalidThenDeleteThenFail() {
         whenNoCacheThenGetFromObservable();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
