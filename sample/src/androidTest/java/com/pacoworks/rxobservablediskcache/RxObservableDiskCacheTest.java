@@ -52,9 +52,38 @@ public class RxObservableDiskCacheTest {
         testBook.destroy().subscribe();
     }
 
+    public TestSubscriber initCache() {
+        final List<Serializable> initialList = Arrays.<Serializable> asList(true, 1, "hello");
+        final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
+                .create();
+        RxObservableDiskCache.transform(Single.just(initialList), KEY, testBook,
+                new Func1<List<Serializable>, MyPolicy>() {
+                    @Override
+                    public MyPolicy call(List<Serializable> serializables) {
+                        return new MyPolicy();
+                    }
+                }, new Func1<MyPolicy, Boolean>() {
+                    @Override
+                    public Boolean call(MyPolicy myPolicy) {
+                        return true;
+                    }
+                }).subscribe(subscriber);
+        subscriber.awaitTerminalEvent();
+        return subscriber;
+    }
+
+    @Test
+    public void whenNoCacheThenGetFromObservable() {
+        final TestSubscriber subscriber = initCache();
+        /* Assert */
+        subscriber.assertNoErrors();
+        subscriber.assertCompleted();
+        subscriber.assertValueCount(1);
+    }
+
     @Test
     public void whenCacheHitThenGetFromCacheThenObservable() {
-        whenNoCacheThenGetFromObservable();
+        initCache();
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
@@ -79,33 +108,8 @@ public class RxObservableDiskCacheTest {
     }
 
     @Test
-    public void whenNoCacheThenGetFromObservable() {
-        final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
-        final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
-                .create();
-        /* Act */
-        RxObservableDiskCache.transform(Single.just(list), KEY, testBook,
-                new Func1<List<Serializable>, MyPolicy>() {
-                    @Override
-                    public MyPolicy call(List<Serializable> serializables) {
-                        return new MyPolicy();
-                    }
-                }, new Func1<MyPolicy, Boolean>() {
-                    @Override
-                    public Boolean call(MyPolicy myPolicy) {
-                        return true;
-                    }
-                }).subscribe(subscriber);
-        subscriber.awaitTerminalEvent();
-        /* Assert */
-        subscriber.assertNoErrors();
-        subscriber.assertCompleted();
-        subscriber.assertValueCount(1);
-    }
-
-    @Test
     public void whenCacheInvalidThenDeleteThenGetFromObservable() {
-        whenNoCacheThenGetFromObservable();
+        initCache();
         final List<Serializable> list = Arrays.<Serializable> asList(true, 1, "hello");
         final TestSubscriber<Cached<List<Serializable>, MyPolicy>> subscriber = TestSubscriber
                 .create();
@@ -154,7 +158,7 @@ public class RxObservableDiskCacheTest {
 
     @Test
     public void whenErrorAndCacheHitThenReturnCacheThenFail() {
-        whenNoCacheThenGetFromObservable();
+        initCache();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
                 testBook, new Func1<Integer, MyPolicy>() {
@@ -176,7 +180,7 @@ public class RxObservableDiskCacheTest {
 
     @Test
     public void whenErrorAndCacheInvalidThenDeleteThenFail() {
-        whenNoCacheThenGetFromObservable();
+        initCache();
         final TestSubscriber<Cached<Integer, MyPolicy>> subscriber = TestSubscriber.create();
         RxObservableDiskCache.transform(Single.<Integer> error(new IllegalStateException()), KEY,
                 testBook, new Func1<Integer, MyPolicy>() {
