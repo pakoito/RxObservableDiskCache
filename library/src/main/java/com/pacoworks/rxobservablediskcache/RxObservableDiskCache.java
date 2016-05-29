@@ -31,21 +31,21 @@ import rx.functions.Func1;
  * Make sure to call {@link RxPaperBook#init(Context)} at least once beforehand to initialize the
  * underlying database.
  *
- * @param <Value> type of the data to store
- * @param <Policy> type of the policy to store
+ * @param <V> type of the data to store
+ * @param <P> type of the policy to store
  * @author pakoito
  */
-public final class RxObservableDiskCache<Value, Policy> {
+public final class RxObservableDiskCache<V, P> {
     private static final String POLICY_APPEND = "_policy";
 
     private final RxPaperBook book;
 
-    private final Func1<Value, Policy> policyCreator;
+    private final Func1<V, P> policyCreator;
 
-    private final Func1<Policy, Boolean> policyValidator;
+    private final Func1<P, Boolean> policyValidator;
 
-    RxObservableDiskCache(RxPaperBook book, Func1<Value, Policy> policyCreator,
-            Func1<Policy, Boolean> policyValidator) {
+    RxObservableDiskCache(RxPaperBook book, Func1<V, P> policyCreator,
+            Func1<P, Boolean> policyValidator) {
         this.book = book;
         this.policyValidator = policyValidator;
         this.policyCreator = policyCreator;
@@ -220,7 +220,7 @@ public final class RxObservableDiskCache<Value, Policy> {
      * @return an {@link Observable} that will return a cached Value followed by the result of
      *         executing single
      */
-    public Observable<Cached<Value, Policy>> transform(Single<Value> single, String key) {
+    public Observable<Cached<V, P>> transform(Single<V> single, String key) {
         return transform(single, key, book, policyCreator, policyValidator);
     }
 }
