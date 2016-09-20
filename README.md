@@ -132,7 +132,7 @@ myNotSingleObservable.flatMap(
 
 ####If I cancel an operation it throws a `Single` or `Completable` incomplete exception
 
-Database operations are not meant to be cancellable, and shouldn't be applied directly to UI precisely to avoid leaks. Apply them to a `Subject` instead, and bind that directly to the view making sure that you `unsubscribe()` it when required.
+Database operations are not meant to be cancellable, and shouldn't be applied directly to UI precisely to avoid leaks. Apply them to a `PublishSubject` instead, and bind that subject directly to the view making sure that you `unsubscribe()` it when required.
 
 ##Contribution
 
