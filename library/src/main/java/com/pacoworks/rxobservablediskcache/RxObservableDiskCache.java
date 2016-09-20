@@ -112,29 +112,21 @@ public class RxObservableDiskCache<V, P> {
             final Single<V> single, final String key, final RxPaperBook paperBook,
             final Func1<V, P> policyCreator, final Func1<P, Boolean> policyValidator) {
         return Observable
+                /* Requests are materialised to avoid a bug where concat would finish early after onError */
                 .concat(
                         RxObservableDiskCache.<V, P>requestCachedValue(key, paperBook, policyValidator)
-                                .compose(RxObservableDiskCache.<V, P>toMaterializedWithoutComplete()),
-                        requestFreshValue(single, key, paperBook, policyCreator)
-                                .compose(RxObservableDiskCache.<V, P>toMaterializedWithoutComplete()))
+                                .materialize(),
+                        RxObservableDiskCache.<V, P>requestFreshValue(single, key, paperBook, policyCreator)
+                                .materialize())
+                /* Remove OnCompleted because it caused dematerialize() to finish early */
+                .filter(new Func1<Notification<Cached<V, P>>, Boolean>() {
+                    @Override
+                    public Boolean call(Notification<Cached<V, P>> cachedNotification) {
+                        return cachedNotification.getKind() != Notification.Kind.OnCompleted;
+                    }
+                })
+                /* Revert materialize operation back to regular results */
                 .dematerialize();
-    }
-
-    private static <V, P> Observable.Transformer<Cached<V, P>, Notification<Cached<V, P>>> toMaterializedWithoutComplete() {
-        return new Observable.Transformer<Cached<V, P>, Notification<Cached<V, P>>>() {
-            @Override
-            public Observable<Notification<Cached<V, P>>> call(Observable<Cached<V, P>> cachedObservable) {
-                return cachedObservable
-                        .materialize()
-                        .filter(
-                                new Func1<Notification<Cached<V, P>>, Boolean>() {
-                                    @Override
-                                    public Boolean call(Notification<Cached<V, P>> cachedNotification) {
-                                        return cachedNotification.getKind() != Notification.Kind.OnCompleted;
-                                    }
-                                });
-            }
-        };
     }
 
     private static <V, P> Observable<Cached<V, P>> requestCachedValue(
