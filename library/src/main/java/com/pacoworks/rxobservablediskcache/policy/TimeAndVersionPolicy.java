@@ -33,11 +33,6 @@ public class TimeAndVersionPolicy {
 
     public final int version;
 
-    TimeAndVersionPolicy(final int version) {
-        timestamp = System.currentTimeMillis();
-        this.version = version;
-    }
-
     TimeAndVersionPolicy(final long timestampMillis, final int version) {
         this.timestamp = timestampMillis;
         this.version = version;
@@ -55,7 +50,7 @@ public class TimeAndVersionPolicy {
         return new Func1<T, TimeAndVersionPolicy>() {
             @Override
             public TimeAndVersionPolicy call(T t) {
-                return new TimeAndVersionPolicy(version);
+                return new TimeAndVersionPolicy(System.currentTimeMillis(), version);
             }
         };
     }
