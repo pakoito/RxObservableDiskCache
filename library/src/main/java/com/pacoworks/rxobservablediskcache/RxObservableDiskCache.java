@@ -21,6 +21,7 @@ import android.content.Context;
 import com.pacoworks.rxpaper.RxPaperBook;
 
 import rx.Completable;
+import rx.Notification;
 import rx.Observable;
 import rx.Single;
 import rx.functions.Func1;
@@ -112,8 +113,28 @@ public class RxObservableDiskCache<V, P> {
             final Func1<V, P> policyCreator, final Func1<P, Boolean> policyValidator) {
         return Observable
                 .concat(
-                    RxObservableDiskCache.<V, P>requestCachedValue(key, paperBook, policyValidator),
-                    requestFreshValue(single, key, paperBook, policyCreator));
+                        RxObservableDiskCache.<V, P>requestCachedValue(key, paperBook, policyValidator)
+                                .compose(RxObservableDiskCache.<V, P>toMaterializedWithoutComplete()),
+                        requestFreshValue(single, key, paperBook, policyCreator)
+                                .compose(RxObservableDiskCache.<V, P>toMaterializedWithoutComplete()))
+                .dematerialize();
+    }
+
+    private static <V, P> Observable.Transformer<Cached<V, P>, Notification<Cached<V, P>>> toMaterializedWithoutComplete() {
+        return new Observable.Transformer<Cached<V, P>, Notification<Cached<V, P>>>() {
+            @Override
+            public Observable<Notification<Cached<V, P>>> call(Observable<Cached<V, P>> cachedObservable) {
+                return cachedObservable
+                        .materialize()
+                        .filter(
+                                new Func1<Notification<Cached<V, P>>, Boolean>() {
+                                    @Override
+                                    public Boolean call(Notification<Cached<V, P>> cachedNotification) {
+                                        return cachedNotification.getKind() != Notification.Kind.OnCompleted;
+                                    }
+                                });
+            }
+        };
     }
 
     private static <V, P> Observable<Cached<V, P>> requestCachedValue(
