@@ -55,7 +55,7 @@ public class VersionPolicy {
      * @param expectedVersion expected version to pass validation
      * @return validation function
      */
-    public static Func1<VersionPolicy, Boolean> validate(final long expectedVersion) {
+    public static Func1<VersionPolicy, Boolean> validate(final int expectedVersion) {
         return new Func1<VersionPolicy, Boolean>() {
             @Override
             public Boolean call(VersionPolicy myPolicy) {
