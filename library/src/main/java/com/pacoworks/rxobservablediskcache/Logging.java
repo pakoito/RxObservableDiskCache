@@ -16,9 +16,9 @@
 
 package com.pacoworks.rxobservablediskcache;
 
-import java.util.Locale;
-
 import android.util.Log;
+
+import java.util.Locale;
 
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -31,10 +31,14 @@ import rx.functions.Action1;
 class Logging {
     private static final String TAG = "RxObservableDiskCache";
 
-    static <Value, Policy> Action1<Cached<Value, Policy>> logCacheHit(final String key) {
-        return new Action1<Cached<Value, Policy>>() {
+    private Logging() {
+        // No instances
+    }
+
+    static <V, P> Action1<Cached<V, P>> logCacheHit(final String key) {
+        return new Action1<Cached<V, P>>() {
             @Override
-            public void call(Cached<Value, Policy> valuePolicyCached) {
+            public void call(Cached<V, P> valuePolicyCached) {
                 Log.d(TAG, "Cache hit: " + key);
             }
         };
@@ -45,7 +49,7 @@ class Logging {
             @Override
             public void call(Throwable t) {
                 Log.e(TAG,
-                        String.format(Locale.US, "Cache miss: %s\nCaused by: %s", key,
+                        String.format(Locale.US, "Cache miss: %s%nCaused by: %s", key,
                                 t.getMessage()));
             }
         };
