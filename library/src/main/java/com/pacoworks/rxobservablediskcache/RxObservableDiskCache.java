@@ -21,7 +21,6 @@ import android.content.Context;
 import com.pacoworks.rxpaper.RxPaperBook;
 
 import rx.Completable;
-import rx.Notification;
 import rx.Observable;
 import rx.Single;
 import rx.functions.Func1;
@@ -112,21 +111,10 @@ public class RxObservableDiskCache<V, P> {
             final Single<V> single, final String key, final RxPaperBook paperBook,
             final Func1<V, P> policyCreator, final Func1<P, Boolean> policyValidator) {
         return Observable
-                /* Requests are materialised to avoid a bug where concat would finish early after onError */
-                .concat(
-                        RxObservableDiskCache.<V, P>requestCachedValue(key, paperBook, policyValidator)
-                                .materialize(),
-                        RxObservableDiskCache.<V, P>requestFreshValue(single, key, paperBook, policyCreator)
-                                .materialize())
-                /* Remove OnCompleted because it caused dematerialize() to finish early */
-                .filter(new Func1<Notification<Cached<V, P>>, Boolean>() {
-                    @Override
-                    public Boolean call(Notification<Cached<V, P>> cachedNotification) {
-                        return cachedNotification.getKind() != Notification.Kind.OnCompleted;
-                    }
-                })
-                /* Revert materialize operation back to regular results */
-                .dematerialize();
+                /* Errors require being delayed so the cached subscription is completed even if the remote one fails */
+                .concatDelayError(
+                        RxObservableDiskCache.<V, P>requestCachedValue(key, paperBook, policyValidator),
+                        RxObservableDiskCache.<V, P>requestFreshValue(single, key, paperBook, policyCreator));
     }
 
     private static <V, P> Observable<Cached<V, P>> requestCachedValue(
