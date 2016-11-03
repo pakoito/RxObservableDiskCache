@@ -12,6 +12,10 @@ RxObservableDiskCache relies on a technology that's common on desktop and server
 
 To avoid your data getting stale due to time limits or versioning, RxObservableDiskCache allows you to store an arbitrary caching Policy. This Policy is any simple object that helps you identify whether your data is outdated and has to be removed. RxObservableDiskCache provides three different Policy objects, but you can create and use your own. This way you can decide how to handle staleness the same way you would do in SQLite or when using etags: by dropping the data, or programming defensively to account for model changes.
 
+##Updating from 1.X
+
+As [PaperDb 2.0](https://github.com/pilgr/Paper/releases/tag/2.0) has updated from Kryo 3 to [Kryo 4](https://github.com/EsotericSoftware/kryo/releases/tag/kryo-parent-4.0.0), the internal representation model has changed. PaperDb deals with these changes internally, so the migration should be transparent. If you find any data compatibility bug, please [create a ticket](https://github.com/pilgr/Paper/issues/new).
+
 ##Usage
 
 ####Storage
@@ -85,7 +89,7 @@ repositories {
 
 dependencies {
     ...
-    compile 'com.github.pakoito:RxObservableDiskCache:1.0.0'
+    compile 'com.github.pakoito:RxObservableDiskCache:2.0.0'
     ...
 }
 ```
@@ -101,7 +105,7 @@ or to your `pom.xml`
 <dependency>
     <groupId>com.github.pakoito</groupId>
     <artifactId>RxObservableDiskCache</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
