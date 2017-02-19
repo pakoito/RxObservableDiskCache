@@ -2,6 +2,8 @@
 
 RxObservableDiskCache is a library to save the results of `Single`s or single value `Observable`s request on a local disk cache, so the next time the same request is called you get an immediate result.
 
+For the RxJava 2.X version, please go to [RxObservableDiskCache2](https://github.com/pakoito/RxObservableDiskCache2).
+
 ##Rationale
 
 RxObservableDiskCache was created with a single purpose: help you store your network results in a disk cache and refetch them as soon as they're re-requested. It also solves displaying values while waiting for network results, when the user is offline, or when the server is unavailable.
